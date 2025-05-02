@@ -11,7 +11,7 @@ import (
 )
 
 type HashData struct {
-    Hashes map[string]string `toml:"hashes"` // info_hash -> steam_id
+    Hashes map[string]string `toml:"hashes"` // info_hash -> AppID
 }
 
 func main() {
@@ -37,7 +37,7 @@ func main() {
     _, err = db.Exec(`
         CREATE TABLE IF NOT EXISTS hashes (
             info_hash TEXT NOT NULL UNIQUE PRIMARY KEY,
-            steam_id TEXT NOT NULL UNIQUE,
+            AppID TEXT NOT NULL UNIQUE,
             installed BOOLEAN NOT NULL DEFAULT 0
         );
     `)
@@ -47,9 +47,9 @@ func main() {
 
     // Prepare insert or update statement
     stmt, err := db.Prepare(`
-        INSERT INTO hashes(info_hash, steam_id, installed)
+        INSERT INTO hashes(info_hash, AppID, installed)
         VALUES (?, ?, COALESCE((SELECT installed FROM hashes WHERE info_hash = ?), 0))
-        ON CONFLICT(info_hash) DO UPDATE SET steam_id = excluded.steam_id;
+        ON CONFLICT(info_hash) DO UPDATE SET AppID = excluded.AppID;
     `)
     if err != nil {
         log.Fatalf("Failed to prepare statement: %v", err)
